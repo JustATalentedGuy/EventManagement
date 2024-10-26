@@ -97,12 +97,18 @@ public class AdminPage {
             buttonBox.setSpacing(10);
 
             Button approveButton = new Button("Approve");
-            approveButton.setOnAction(e -> admin.acceptOrganizingRequest(req));
-            approveButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;"); // green button
+            approveButton.setOnAction(e -> {
+                admin.acceptOrganizingRequest(req);
+                app.showAdminPage(admin);
+            });
+            approveButton.setStyle("-fx-background-color: #4CAF50; -fx-text-fill: white;");
 
             Button rejectButton = new Button("Reject");
-            rejectButton.setOnAction(e -> admin.declineOrganizingRequest(req));
-            rejectButton.setStyle("-fx-background-color: #FF0000; -fx-text-fill: white;"); // red button
+            rejectButton.setOnAction(e -> {
+                admin.declineOrganizingRequest(req);
+                app.showAdminPage(admin);
+            });
+            rejectButton.setStyle("-fx-background-color: #FF0000; -fx-text-fill: white;");
 
             buttonBox.getChildren().addAll(approveButton, rejectButton);
 

@@ -59,6 +59,40 @@ public abstract class SystemManager {
         }
     }
 
+    public static ArrayList<User> getAllUsers() {
+        ArrayList<User> users = new ArrayList<>();
+        String query = "SELECT * FROM users";
+        try (PreparedStatement stmt = con.prepareStatement(query)) {
+            try (ResultSet result = stmt.executeQuery()) {
+                while (result.next()) {
+                    int id = result.getInt("id");
+                    String username = result.getString("username");
+                    String password = result.getString("password");
+                    String email = result.getString("email");
+                    String userType = result.getString("userType");
+                    User user = null;
+                    switch (userType) {
+                        case "Admin":
+                            user = new Admin(id, username, password);
+                            break;
+                        case "Organizer":
+                            user = new Organizer(id, username, password, email);
+                            break;
+                        case "Viewer":
+                            user = new Viewer(id, username, password, email);
+                            break;
+                        default:
+                            break;
+                    }
+                    users.add(user);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
     public static boolean registerUserToEvent(int userID, int eventID) {
         String query = "INSERT INTO registration (user_id, event_id) VALUES (?, ?)";
         try (PreparedStatement stmt = con.prepareStatement(query)) {
@@ -190,7 +224,7 @@ public abstract class SystemManager {
 
     public static ArrayList<Event> getListOfRegisteredEvents(int id) {
         ArrayList<Event> events = new ArrayList<>();
-        String query = "SELECT * FROM registrations WHERE userid = ?";
+        String query = "SELECT * FROM registration WHERE userid = ?";
         try (PreparedStatement stmt = con.prepareStatement(query)) {
             stmt.setInt(1, id);
             try (ResultSet result = stmt.executeQuery()) {
@@ -677,5 +711,39 @@ public abstract class SystemManager {
             e.printStackTrace();
         }
         return null;
+    }
+
+
+
+
+
+
+
+    // Helper Events
+    public static boolean isMaxReached(int eventID) {
+        Event event = getEvent(eventID);
+        return event.getMaxParticipants() == SystemManager.getListOfUsersFromEvent(eventID).size();
+    }
+
+    public static int isCollision(String startTime, String endTime, String venue, boolean type) {
+        ArrayList<Event> events = getAllEvents();
+        for (Event event : events) {
+            if (event.getVenue().getName().equals(venue) && !event.isOnline() && !type) {
+                if (event.isCollision(startTime, endTime)) {
+                    return event.getEventID();
+                }
+            }
+        }
+        return 0;
+    }
+
+    public static boolean userAlreadyRegistered(String email) {
+        ArrayList<User> users = getAllUsers();
+        for (User user : users) {
+            if (user.getEmail().equals(email)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -56,7 +56,6 @@ public class AdminVenuesPage {
             HBox.setHgrow(venueLabel, Priority.ALWAYS);
             venueLabel.setMaxWidth(Double.MAX_VALUE);
 
-            // Delete button action
             deleteButton.setOnAction(e -> {
                 deleteVenue(venue);
                 app.showManageVenuesPage(admin); 

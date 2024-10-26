@@ -24,6 +24,7 @@ public abstract class Event {
     protected boolean approved;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+
     public Event(int eventID, String name, String description, Venue venue, Department department, Organizer organizer, String startTime, String endTime, int maxParticipants, boolean online, boolean finished, boolean approved) {
         this.eventID = eventID;
         this.name = name;
@@ -155,8 +156,8 @@ public abstract class Event {
     }
 
     public boolean isCollision(String startTime, String endTime) {
-        LocalDateTime startDate = LocalDateTime.parse(startTime, formatter);
-        LocalDateTime endDate = LocalDateTime.parse(endTime, formatter);
+        LocalDateTime startDate = LocalDateTime.parse(startTime+":00", formatter);
+        LocalDateTime endDate = LocalDateTime.parse(endTime+":00", formatter);
 
         return (
             startDate.isAfter(this.getStartTimeDate()) && startDate.isBefore(this.getEndTimeDate()) ||

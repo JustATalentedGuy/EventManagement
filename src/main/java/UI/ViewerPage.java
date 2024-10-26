@@ -132,12 +132,19 @@ public class ViewerPage {
     
         // Check if the user is already registered for the event
         if (SystemManager.userIsRegisteredToEvent(viewer.getUserID(), event.getEventID())) {
-            Label registeredLabel = new Label("Registered");
-            registeredLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: green;");
-            eventCard.getChildren().addAll(titleBox, eventDesc, eventDate, eventVenue, eventDept, eventOrganizer, maxParticipants, isOnlineLabel, field1Label, field2Label, registeredLabel);
+            Button registeredButton = new Button("Unregister");
+            registeredButton.setOnAction(e -> {
+                SystemManager.removeUserRegistrationFromEvent(viewer.getUserID(), event.getEventID());
+                app.showViewerPage(viewer);
+            });
+            registeredButton.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: green;");
+            eventCard.getChildren().addAll(titleBox, eventDesc, eventDate, eventVenue, eventDept, eventOrganizer, maxParticipants, isOnlineLabel, field1Label, field2Label, registeredButton);
         } else {
             Button registerButton = new Button("Register");
-            registerButton.setOnAction(e -> registerForEvent(event));
+            registerButton.setOnAction(e -> {
+                registerForEvent(event);
+                app.showViewerPage(viewer);
+            });
             eventCard.getChildren().addAll(titleBox, eventDesc, eventDate, eventVenue, eventDept, eventOrganizer, maxParticipants, isOnlineLabel, field1Label, field2Label, registerButton);
         }
         return eventCard;

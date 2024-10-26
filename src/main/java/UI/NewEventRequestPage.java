@@ -18,6 +18,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.control.Alert;
 import javafx.scene.text.Font;
 import system.SystemManager;
 import users.Organizer;
@@ -264,9 +265,17 @@ public class NewEventRequestPage {
     }
 
     private void submitEventRequest(String eventName, String eventDescription, String venueName, String departmentName, int organizerID, String startTime, String endTime, int maxParticipants, boolean isOnline, String field1, String field2, String eventType) {
-        int venueID = SystemManager.getVenue(venueName).getVenueID();
-        int departmentID = SystemManager.getDepartment(departmentName).getDepartmentID();
-        SystemManager.createEvent(eventName, eventDescription, venueID, departmentID, organizerID, startTime, endTime, maxParticipants, isOnline, false, false, eventType, field1, field2);
+        int result = SystemManager.isCollision(startTime, endTime, venueName, isOnline);
+        if (result == 0) {
+            int venueID = SystemManager.getVenue(venueName).getVenueID();
+            int departmentID = SystemManager.getDepartment(departmentName).getDepartmentID();
+            SystemManager.createEvent(eventName, eventDescription, venueID, departmentID, organizerID, startTime, endTime, maxParticipants, isOnline, false, false, eventType, field1, field2);
+            showAlert("EVENT SUCCESSFULLY SUBMITTED", "Wait for the Admin to accept");
+            app.showOrganizerPage(organizer);
+        }
+        else {
+            showAlert("EVENT FAILED TO SUBMIT", "There is a collision with another event named " + SystemManager.getEvent(result).getName());
+        }
     }
 
     private ArrayList<String> getAllVenueStrings() {
@@ -283,6 +292,14 @@ public class NewEventRequestPage {
             departmentStrings.add(department.getName());
         }
         return departmentStrings;
+    }
+
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public VBox getRootPane() {

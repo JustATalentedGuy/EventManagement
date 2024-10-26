@@ -3,7 +3,12 @@ package UI;
 import java.util.ArrayList;
 
 import eventmanagement.Main;
+import events.Competition;
 import events.Event;
+import events.Seminar;
+import events.Workshop;
+
+import java.time.format.DateTimeFormatter;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -12,6 +17,8 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import system.SystemManager;
@@ -72,19 +79,53 @@ public class OrganizerPage {
 
     private VBox createEventCard(Event event) {
         VBox eventCard = new VBox();
-        eventCard.setPadding(new Insets(10));
-        eventCard.setStyle("-fx-border-color: black; -fx-border-width: 1; -fx-background-color: #ffffff;");
+        eventCard.setPadding(new Insets(15));
+        eventCard.setSpacing(10);
+        Label field1Label = null, field2Label = null;
+        
+        if (event instanceof Workshop) {
+            eventCard.setStyle(eventCard.getStyle() + "-fx-background-color: #ffe6b3;");
+            Workshop workshop_event = (Workshop) event;
+            field1Label = new Label("Trainer Name: " + workshop_event.getTrainerName());
+            field2Label = new Label("Materials Provided: " + workshop_event.getMaterialsProvided());
+        } else if (event instanceof Seminar) {
+            eventCard.setStyle(eventCard.getStyle() + "-fx-background-color: #b3d9ff;");
+            Seminar seminar_event = (Seminar) event;
+            field1Label = new Label("Speaker: " + seminar_event.getSpeaker());
+            field2Label = new Label("Topic: " + seminar_event.getTopic());
+        } else if (event instanceof Competition) {
+            eventCard.setStyle(eventCard.getStyle() + "-fx-background-color: #ccffcc;");
+            Competition competition_event = (Competition) event;
+            field1Label = new Label("Prize Amount: " + competition_event.getPrizeAmount());
+            field2Label = new Label("Type of Competition: " + competition_event.getCompetitionType());
+        }        
+    
+        HBox titleBox = new HBox();
         Label eventTitle = new Label(event.getName());
-        eventTitle.setFont(Font.font(18));
-        eventTitle.setStyle("-fx-text-fill: #3498db;");
-        Label eventDesc = new Label(event.getDescription());
-        eventDesc.setFont(Font.font(14));
-        eventDesc.setStyle("-fx-text-fill: #666666;");
-        Label eventDate = new Label("Date: " + event.getStartTime() + " - " + event.getEndTime());
-        eventDate.setFont(Font.font(14));
-        eventDate.setStyle("-fx-text-fill: #666666;");
+        eventTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+    
+        // Add registered count at the right end of event title
+        Label registeredCount = new Label("Registered x" + SystemManager.getListOfUsersFromEvent(event.getEventID()).size());
+        registeredCount.setStyle("-fx-alignment: center-right; -fx-font-size: 14px;");
+        HBox.setHgrow(registeredCount, Priority.ALWAYS);
+        registeredCount.setMaxWidth(Double.MAX_VALUE);
+    
+        titleBox.getChildren().addAll(eventTitle, registeredCount);
+    
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy, hh:mm a");
+        String formattedStartTime = event.getStartTimeDate().format(formatter);
+        String formattedEndTime = event.getEndTimeDate().format(formatter);
 
-        eventCard.getChildren().addAll(eventTitle, eventDesc, eventDate);
+    
+        Label eventDesc = new Label(event.getDescription());
+        Label eventDate = new Label("Date: " + formattedStartTime + " - " + formattedEndTime);
+        Label eventVenue = new Label("Venue: " + event.getVenue().getName());
+        Label eventDept = new Label("Department: " + event.getDepartment().getName());
+        Label eventOrganizer = new Label("Organizer: " + event.getOrganizer().getUsername());
+        Label maxParticipants = new Label("Max Participants: " + event.getMaxParticipants());
+        Label isOnlineLabel = new Label(event.isOnline() ? "Online Event" : "Offline Event");
+    
+        eventCard.getChildren().addAll(titleBox, eventDesc, eventDate, eventVenue, eventDept, eventOrganizer, maxParticipants, isOnlineLabel, field1Label, field2Label);
         return eventCard;
     }
 
