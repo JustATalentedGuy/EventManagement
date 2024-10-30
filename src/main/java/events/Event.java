@@ -22,10 +22,12 @@ public abstract class Event {
     protected boolean online;
     protected boolean finished;
     protected boolean approved;
+    protected boolean rejected;
+    protected String eventType;
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 
-    public Event(int eventID, String name, String description, Venue venue, Department department, Organizer organizer, String startTime, String endTime, int maxParticipants, boolean online, boolean finished, boolean approved) {
+    public Event(int eventID, String name, String description, Venue venue, Department department, Organizer organizer, String startTime, String endTime, int maxParticipants, boolean online, boolean finished, boolean approved, boolean rejected, String eventType) {
         this.eventID = eventID;
         this.name = name;
         this.description = description;
@@ -38,6 +40,8 @@ public abstract class Event {
         this.online = online;
         this.finished = finished;
         this.approved = approved;
+        this.eventType = eventType;
+        this.rejected = rejected;
     }
 
     public boolean registerUser(User user) {
@@ -114,6 +118,15 @@ public abstract class Event {
     public boolean setApproved(boolean newApproved) {
         if (SystemManager.updateEvent(eventID, "approved", Boolean.toString(newApproved))) {
             this.approved = newApproved;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean setEventType(String type) {
+        if (SystemManager.updateEvent(eventID, "eventtype", type)) {
+            this.eventType = type;
             return true;
         } else {
             return false;
@@ -215,5 +228,13 @@ public abstract class Event {
 
     public boolean isApproved() {
         return approved;
+    }
+
+    public boolean isRejected() {
+        return rejected;
+    }
+
+    public String getEventType() {
+        return eventType;
     }
 }

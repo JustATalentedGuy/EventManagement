@@ -39,12 +39,10 @@ public class LoginPage {
         rootPane.setVgap(20);
         rootPane.setBackground(new Background(new BackgroundFill(Color.web("#3498db"), CornerRadii.EMPTY, Insets.EMPTY)));
 
-        // Add title
         Label titleLabel = new Label("Event Management System");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;");
         rootPane.add(titleLabel, 0, 0, 2, 1);
 
-        // Menu bar
         MenuBar menuBar = new MenuBar();
         Menu menu = new Menu("Options");
         MenuItem aboutItem = new MenuItem("About");
@@ -52,10 +50,9 @@ public class LoginPage {
         menu.getItems().addAll(aboutItem, exitItem);
         menuBar.getMenus().add(menu);
         exitItem.setOnAction(e -> System.exit(0));
-        aboutItem.setOnAction(e -> showAlert("About", "This is a event management system that helps coordinate all the events happening within our college."));
+        aboutItem.setOnAction(e -> showAlert("About", "This is an event management system for college events."));
         rootPane.add(menuBar, 0, 1, 2, 1);
 
-        // Username and password fields
         Label userLabel = new Label("Username:");
         userLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: white;");
         TextField userField = new TextField();
@@ -71,8 +68,7 @@ public class LoginPage {
         rootPane.add(passLabel, 0, 3);
         rootPane.add(passField, 1, 3);
 
-        // User type selection
-        Label userTypeLabel = new Label("User  Type:");
+        Label userTypeLabel = new Label("User Type:");
         userTypeLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: white;");
         ComboBox<String> userTypeBox = new ComboBox<>();
         userTypeBox.getItems().addAll("Viewer", "Organizer", "Admin");
@@ -81,31 +77,30 @@ public class LoginPage {
         rootPane.add(userTypeLabel, 0, 4);
         rootPane.add(userTypeBox, 1, 4);
 
-        // Login button
         Button loginButton = new Button("Login");
-        loginButton.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-size: 16px; -fx-cursor: hand;");
+        loginButton.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-size: 16px;");
         loginButton.setOnAction(e -> {
             String userType = userTypeBox.getValue();
             String username = userField.getText();
             String password = passField.getText();
 
             int id = SystemManager.validateUser(username, password, userType);
-
             if (id != -1) {
                 User user = SystemManager.getUser(id);
-                if (userType.equals("Viewer")) {
-                    app.showViewerPage((Viewer) user);
-                } else if (userType.equals("Organizer")) {
-                    app.showOrganizerPage((Organizer) user);
-                } else if (userType.equals("Admin")) {
-                    app.showAdminPage((Admin) user);
-                }
+                if (userType.equals("Viewer")) app.showViewerPage((Viewer) user);
+                else if (userType.equals("Organizer")) app.showOrganizerPage((Organizer) user);
+                else if (userType.equals("Admin")) app.showAdminPage((Admin) user);
             } else {
                 showAlert("Login failed", "Invalid username, password, or user type.");
             }
         });
 
+        Button switchToRegisterButton = new Button("Register");
+        switchToRegisterButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14px;");
+        switchToRegisterButton.setOnAction(e -> app.showRegisterPage());
+
         rootPane.add(loginButton, 1, 5);
+        rootPane.add(switchToRegisterButton, 1, 6);
     }
 
     private void showAlert(String title, String message) {

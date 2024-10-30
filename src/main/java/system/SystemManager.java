@@ -36,27 +36,26 @@ public abstract class SystemManager {
 
 
     // USER RELATED FUNCTIONS
-    public static int registerUser (String username, String password, String email, String userType) {
+    public static boolean registerUser (String username, String password, String email, String userType) {
         String query = "INSERT INTO users (username, password, email, usertype) VALUES (?, ?, ?, ?)";
         try (PreparedStatement stmt = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, username);
             stmt.setString(2, password);
             stmt.setString(3, email);
             stmt.setString(4, userType);
-
             int rowsAffected = stmt.executeUpdate();
-            if (rowsAffected > 0)  {
+            if (rowsAffected > 0) {
                 try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        return generatedKeys.getInt(1);
+                        return true;
                     }
                 }
             }
-            return -1;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return -1;
         }
+        catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public static ArrayList<User> getAllUsers() {
@@ -317,6 +316,8 @@ public abstract class SystemManager {
                                 result.getBoolean("online"),
                                 result.getBoolean("finished"),
                                 result.getBoolean("approved"),
+                                result.getBoolean("rejected"),
+                                eventType,
                                 Integer.parseInt(result.getString("field1")),
                                 result.getString("field2")
                         );
@@ -334,6 +335,8 @@ public abstract class SystemManager {
                                 result.getBoolean("online"),
                                 result.getBoolean("finished"),
                                 result.getBoolean("approved"),
+                                result.getBoolean("rejected"),
+                                eventType,
                                 result.getString("field1"),
                                 result.getString("field2")
                         );
@@ -351,6 +354,8 @@ public abstract class SystemManager {
                                 result.getBoolean("online"),
                                 result.getBoolean("finished"),
                                 result.getBoolean("approved"),
+                                result.getBoolean("rejected"),
+                                eventType,
                                 result.getString("field1"),
                                 result.getString("field2")
                         );
@@ -361,6 +366,38 @@ public abstract class SystemManager {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static ArrayList<Event> getEventsByOrganizer(int id) {
+    String query = "SELECT * FROM event WHERE organizer = ?";
+        ArrayList<Event> events = new ArrayList<>();
+        try (PreparedStatement stmt = con.prepareStatement(query)) {
+            stmt.setInt(1, id);
+            try (ResultSet result = stmt.executeQuery()) {
+                while (result.next()) {
+                    events.add(getEvent(result.getInt("id")));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return events;
+    }
+
+    public static ArrayList<Event> getPendingEventRequests(int id) {
+        String query = "SELECT * FROM event WHERE organizer = ? AND approved = false AND rejected = false";
+        ArrayList<Event> events = new ArrayList<>();
+        try (PreparedStatement stmt = con.prepareStatement(query)) {
+            stmt.setInt(1, id);
+            try (ResultSet result = stmt.executeQuery()) {
+                while (result.next()) {
+                    events.add(getEvent(result.getInt("id")));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return events;
     }
 
     public static ArrayList<Event> getAllEvents() {
@@ -419,7 +456,7 @@ public abstract class SystemManager {
             } else if (newValue instanceof Integer) {
                 stmt.setInt(1, (int) newValue);
             } else if (newValue instanceof Boolean) {
-                stmt.setBoolean(1, (boolean) newValue);
+                stmt.setInt(1, (boolean) newValue ? 1 : 0);
             } else if (newValue instanceof Timestamp) {
                 stmt.setTimestamp(1, (Timestamp) newValue);
             }
@@ -437,6 +474,18 @@ public abstract class SystemManager {
 
     public static boolean deleteEvent(int id) {
         String query = "DELETE FROM event WHERE id = ?";
+        try (PreparedStatement stmt = con.prepareStatement(query)) {
+            stmt.setInt(1, id);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean rejectEvent(int id) {
+        String query = "UPDATE event SET rejected = true WHERE id = ?";
         try (PreparedStatement stmt = con.prepareStatement(query)) {
             stmt.setInt(1, id);
             int rowsAffected = stmt.executeUpdate();

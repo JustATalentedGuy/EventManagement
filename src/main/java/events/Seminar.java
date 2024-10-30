@@ -9,8 +9,8 @@ public class Seminar extends Event {
     private String speaker;
     private String topic;
 
-    public Seminar(int eventID, String name, String description, Venue venue, Department department, Organizer organizer, String startTime, String endTime, int maxParticipants, boolean online, boolean finished, boolean approved, String speaker, String topic) {
-        super(eventID, name, description, venue, department, organizer, startTime, endTime, maxParticipants, online, finished, approved);
+    public Seminar(int eventID, String name, String description, Venue venue, Department department, Organizer organizer, String startTime, String endTime, int maxParticipants, boolean online, boolean finished, boolean approved, boolean rejected, String eventType, String speaker, String topic) {
+        super(eventID, name, description, venue, department, organizer, startTime, endTime, maxParticipants, online, finished, approved, rejected, eventType);
         this.speaker = speaker;
         this.topic = topic;
     }
@@ -37,5 +37,19 @@ public class Seminar extends Event {
 
     public String getTopic() {
         return topic;
+    }
+
+    public Seminar toSeminar() {
+        return this;
+    }
+
+    public Competition toCompetition() {
+        Competition competition = new Competition(eventID, name, description, venue, department, organizer, startTime, endTime, maxParticipants, online, finished, approved, rejected, eventType, 0, "");
+        return competition;
+    }
+
+    public Workshop toWorkshop() {
+        Workshop workshop = new Workshop(eventID, name, description, venue, department, organizer, startTime, endTime, maxParticipants, online, finished, approved, rejected, eventType, "", "");
+        return workshop;
     }
 }

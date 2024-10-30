@@ -119,7 +119,7 @@ public class Admin extends User {
     }
 
     public boolean declineOrganizingRequest(Event event) {
-        return SystemManager.deleteEvent(event.getEventID());
+        return SystemManager.rejectEvent(event.getEventID());
     }
 
     public ArrayList<Event> viewOrganizingRequests() {

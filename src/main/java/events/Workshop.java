@@ -9,8 +9,8 @@ public class Workshop extends Event {
     private String trainerName;
     private String materialsProvided;
 
-    public Workshop(int eventID, String name, String description, Venue venue, Department department, Organizer organizer, String startTime, String endTime, int maxParticipants, boolean online, boolean finished, boolean approved, String trainerName, String materialsProvided) {
-        super(eventID, name, description, venue, department, organizer, startTime, endTime, maxParticipants, online, finished, approved);
+    public Workshop(int eventID, String name, String description, Venue venue, Department department, Organizer organizer, String startTime, String endTime, int maxParticipants, boolean online, boolean finished, boolean approved, boolean rejected, String eventType, String trainerName, String materialsProvided) {
+        super(eventID, name, description, venue, department, organizer, startTime, endTime, maxParticipants, online, finished, approved, rejected, eventType);
         this.trainerName = trainerName;
         this.materialsProvided = materialsProvided;
     }
@@ -37,5 +37,19 @@ public class Workshop extends Event {
 
     public String getMaterialsProvided() {
         return materialsProvided;
+    }
+
+    public Seminar toSeminar() {
+        Seminar seminar = new Seminar(this.eventID, this.name, this.description, this.venue, this.department, this.organizer, this.startTime, this.endTime, this.maxParticipants, this.online, this.finished, this.approved, this.rejected, this.eventType, "", "");
+        return seminar;
+    }
+
+    public Competition toCompetition() {
+        Competition competition = new Competition(this.eventID, this.name, this.description, this.venue, this.department, this.organizer, this.startTime, this.endTime, this.maxParticipants, this.online, this.finished, this.approved, this.rejected, this.eventType, 0, "");
+        return competition;
+    }
+
+    public Workshop toWorkshop() {
+        return this;
     }
 }
