@@ -53,7 +53,7 @@ public class RegisterPage {
         Label userTypeLabel = new Label("User Type:");
         userTypeLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: white;");
         ComboBox<String> userTypeBox = new ComboBox<>();
-        userTypeBox.getItems().addAll("Viewer", "Organizer", "Admin");
+        userTypeBox.getItems().addAll("Viewer", "Organizer");
         userTypeBox.setStyle("-fx-background-color: #f7f7f7; -fx-text-fill: black; -fx-font-size: 12px;");
 
         rootPane.add(userTypeLabel, 0, 5);

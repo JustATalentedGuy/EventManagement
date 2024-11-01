@@ -37,6 +37,9 @@ public abstract class SystemManager {
 
     // USER RELATED FUNCTIONS
     public static boolean registerUser (String username, String password, String email, String userType) {
+        if (username == null || password == null || email == null || userType == null) {
+            return false;
+        }
         String query = "INSERT INTO users (username, password, email, usertype) VALUES (?, ?, ?, ?)";
         try (PreparedStatement stmt = con.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, username);
@@ -189,22 +192,6 @@ public abstract class SystemManager {
         }
     }
 
-    public static ArrayList<Event> getListOfEventsFromUser(int id) {
-        ArrayList<Event> events = new ArrayList<>();
-        String query = "SELECT * FROM registrations WHERE userid = ?";
-        try (PreparedStatement stmt = con.prepareStatement(query)) {
-            stmt.setInt(1, id);
-            try (ResultSet result = stmt.executeQuery()) {
-                while (result.next()) {
-                    events.add(getEvent(result.getInt("eventid")));
-                }
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return events;
-    }
-
     public static ArrayList<Event> getListOfOrganizedEventsForOrganizer(int id) {
         ArrayList<Event> events = new ArrayList<>();
         String query = "SELECT * FROM event WHERE organizer = ?";
@@ -223,12 +210,12 @@ public abstract class SystemManager {
 
     public static ArrayList<Event> getListOfRegisteredEvents(int id) {
         ArrayList<Event> events = new ArrayList<>();
-        String query = "SELECT * FROM registration WHERE userid = ?";
+        String query = "SELECT * FROM registration WHERE user_id = ?";
         try (PreparedStatement stmt = con.prepareStatement(query)) {
             stmt.setInt(1, id);
             try (ResultSet result = stmt.executeQuery()) {
                 while (result.next()) {
-                    events.add(getEvent(result.getInt("eventid")));
+                    events.add(getEvent(result.getInt("event_id")));
                 }
             }
         } catch (SQLException e) {
@@ -249,6 +236,62 @@ public abstract class SystemManager {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public static boolean isFavourite(int userID, int eventID) {
+        String query = "SELECT * FROM favourite WHERE user_id = ? AND event_id = ?";
+        try (PreparedStatement stmt = con.prepareStatement(query)) {
+            stmt.setInt(1, userID);
+            stmt.setInt(2, eventID);
+            try (ResultSet result = stmt.executeQuery()) {
+                return result.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean addToFavourites(int userID, int eventID) {
+        String query = "INSERT INTO favourite (user_id, event_id) VALUES (?, ?)";
+        try (PreparedStatement stmt = con.prepareStatement(query)) {
+            stmt.setInt(1, userID);
+            stmt.setInt(2, eventID);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean removeFromFavourites(int userID, int eventID) {
+        String query = "DELETE FROM favourite WHERE user_id = ? AND event_id = ?";
+        try (PreparedStatement stmt = con.prepareStatement(query)) {
+            stmt.setInt(1, userID);
+            stmt.setInt(2, eventID);
+            int rowsAffected = stmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static ArrayList<Event> getListOfFavouriteEvents(int id) {
+        ArrayList<Event> events = new ArrayList<>();
+        String query = "SELECT * FROM favourite WHERE user_id = ?";
+        try (PreparedStatement stmt = con.prepareStatement(query)) {
+            stmt.setInt(1, id);
+            try (ResultSet result = stmt.executeQuery()) {
+                while (result.next()) {
+                    events.add(getEvent(result.getInt("event_id")));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return events;
     }
 
     

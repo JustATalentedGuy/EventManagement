@@ -98,7 +98,7 @@ public abstract class Event {
     }
 
     public boolean setOnline(boolean newOnline) {
-        if (SystemManager.updateEvent(eventID, "online", Boolean.toString(newOnline))) {
+        if (SystemManager.updateEvent(eventID, "online", newOnline)) {
             this.online = newOnline;
             return true;
         } else {
