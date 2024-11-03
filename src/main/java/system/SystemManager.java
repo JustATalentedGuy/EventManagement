@@ -239,6 +239,23 @@ public abstract class SystemManager {
         return false;
     }
 
+    public static int userPositionInWaitingList(int userID, int eventID) {
+        String query = "SELECT * FROM registration WHERE event_id = ?";
+        try (PreparedStatement stmt = con.prepareStatement(query)) {
+            stmt.setInt(1, eventID);
+            try (ResultSet result = stmt.executeQuery()) {
+                int count = 0;
+                while (result.next()) {
+                    count++;
+                }
+                return count;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     public static boolean isFavourite(int userID, int eventID) {
         String query = "SELECT * FROM favourite WHERE user_id = ? AND event_id = ?";
         try (PreparedStatement stmt = con.prepareStatement(query)) {

@@ -172,11 +172,6 @@ public class NewEventRequestPage {
         goBack.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 16px; -fx-cursor: hand;");
         goBack.setOnAction(e -> app.showOrganizerPage(organizer));
 
-        // Add all components to the rootPane
-        /*rootPane.getChildren().addAll(titleLabel, eventNameField, eventDescField, eventVenueBox, eventDepartmentBox,
-                startDatePicker, startTimeBox, endDatePicker, endTimeBox, onlineOfflineLabel, onlineRadioButton, offlineRadioButton,
-                eventTypeBox, eventSpecificFields, submitButton, goBack);
-        // Add the ScrollPane in the scene layout or root container*/
         // Create a scrollable container for the content
         VBox scrollableContent = new VBox();
         scrollableContent.setSpacing(10);

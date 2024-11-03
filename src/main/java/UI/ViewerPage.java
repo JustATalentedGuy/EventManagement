@@ -3,6 +3,8 @@ package UI;
 import eventmanagement.Main;
 import system.SystemManager;
 import users.Viewer;
+import venue.Department;
+import venue.Venue;
 import events.Competition;
 import events.Event;
 import events.Seminar;
@@ -25,8 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javafx.scene.control.Label;
-import javafx.scene.control.Tooltip;
+
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
@@ -42,6 +43,8 @@ public class ViewerPage {
     private Viewer viewer;
     private VBox rootPane;
     private ComboBox<String> eventTypeFilter;
+    private ComboBox<String> departmentFilter;
+    private ComboBox<String> venueFilter;
     private DatePicker afterDateFilter, beforeDateFilter;
     private VBox eventsContainer;
 
@@ -111,8 +114,23 @@ public class ViewerPage {
         eventTypeFilter = new ComboBox<>();
         eventTypeFilter.getItems().addAll("All", "Competition", "Workshop", "Seminar");
         eventTypeFilter.setValue("All");
-
         eventTypeFilter.setOnAction(e -> applyFilters());
+
+        // Department Filter
+        departmentFilter = new ComboBox<>();
+        ArrayList<Department> availableDepartments = SystemManager.getAllDepartments();
+        departmentFilter.getItems().add("All Departments"); // Add actual departments dynamically if available
+        availableDepartments.forEach(department -> departmentFilter.getItems().add(department.getName()));
+        departmentFilter.setValue("All Departments");
+        departmentFilter.setOnAction(e -> applyFilters());
+
+        // Venue Filter
+        venueFilter = new ComboBox<>();
+        ArrayList<Venue> availableVenues = SystemManager.getAllVenues();
+        venueFilter.getItems().addAll("All Venues"); // Add actual venues dynamically if available
+        availableVenues.forEach(venue -> venueFilter.getItems().add(venue.getName()));
+        venueFilter.setValue("All Venues");
+        venueFilter.setOnAction(e -> applyFilters());
 
         // Date Filters
         afterDateFilter = new DatePicker();
@@ -123,7 +141,13 @@ public class ViewerPage {
         beforeDateFilter.setPromptText("Before Date");
         beforeDateFilter.setOnAction(e -> applyFilters());
 
-        filterPane.getChildren().addAll(new Label("Event Type:"), eventTypeFilter, new Label("After:"), afterDateFilter, new Label("Before:"), beforeDateFilter);
+        filterPane.getChildren().addAll(
+            new Label("Event Type:"), eventTypeFilter,
+            new Label("Department:"), departmentFilter,
+            new Label("Venue:"), venueFilter,
+            new Label("After:"), afterDateFilter,
+            new Label("Before:"), beforeDateFilter
+        );
 
         return filterPane;
     }
@@ -159,10 +183,25 @@ public class ViewerPage {
                         || (selectedType.equals("Seminar") && event instanceof Seminar))
                 .collect(Collectors.toList());
 
+        // Filter by department
+        String selectedDepartment = departmentFilter.getValue();
+        if (!selectedDepartment.equals("All Departments")) {
+            filteredEvents = (ArrayList<Event>) filteredEvents.stream()
+                    .filter(event -> event.getDepartment().getName().equals(selectedDepartment))
+                    .collect(Collectors.toList());
+        }
+
+        // Filter by venue
+        String selectedVenue = venueFilter.getValue();
+        if (!selectedVenue.equals("All Venues")) {
+            filteredEvents = (ArrayList<Event>) filteredEvents.stream()
+                    .filter(event -> event.getVenue().getName().equals(selectedVenue))
+                    .collect(Collectors.toList());
+        }
+
         // Filter by date range
         LocalDate afterDate = afterDateFilter.getValue();
         LocalDate beforeDate = beforeDateFilter.getValue();
-
         if (afterDate != null) {
             filteredEvents = (ArrayList<Event>) filteredEvents.stream()
                     .filter(event -> !event.getStartTimeDate().toLocalDate().isBefore(afterDate))
@@ -218,17 +257,17 @@ public class ViewerPage {
         Label field1Label = null, field2Label = null;
 
         if (event instanceof Workshop) {
-            eventCard.setStyle(eventCard.getStyle() + "-fx-background-color: #ffe6b3;");
+            eventCard.setStyle("-fx-background-color: #ffe6b3;");
             Workshop workshopEvent = (Workshop) event;
             field1Label = new Label("Trainer Name: " + workshopEvent.getTrainerName());
             field2Label = new Label("Materials Provided: " + workshopEvent.getMaterialsProvided());
         } else if (event instanceof Seminar) {
-            eventCard.setStyle(eventCard.getStyle() + "-fx-background-color: #b3d9ff;");
+            eventCard.setStyle("-fx-background-color: #b3d9ff;");
             Seminar seminarEvent = (Seminar) event;
             field1Label = new Label("Speaker: " + seminarEvent.getSpeaker());
             field2Label = new Label("Topic: " + seminarEvent.getTopic());
         } else if (event instanceof Competition) {
-            eventCard.setStyle(eventCard.getStyle() + "-fx-background-color: #ccffcc;");
+            eventCard.setStyle("-fx-background-color: #ccffcc;");
             Competition competitionEvent = (Competition) event;
             field1Label = new Label("Prize Amount: " + competitionEvent.getPrizeAmount());
             field2Label = new Label("Type of Competition: " + competitionEvent.getCompetitionType());
@@ -270,19 +309,32 @@ public class ViewerPage {
                 SystemManager.addToFavourites(viewer.getUserID(), event.getEventID());
                 favoriteButton.setText("Remove from Favorites");
             }
+            app.showViewerPage(viewer);
         });
 
         // Register button
         Button registerButton = new Button("Register");
         Button waitingListButton = new Button("Join Waiting List");
-        
+
         // Check if event is full and viewer is not already registered
         boolean isFull = SystemManager.getListOfUsersFromEvent(event.getEventID()).size() >= event.getMaxParticipants();
         boolean isRegistered = SystemManager.userIsRegisteredToEvent(viewer.getUserID(), event.getEventID());
 
         if (isRegistered) {
-            registerButton.setText("Already Registered");
-            registerButton.setDisable(true);
+            int position = SystemManager.userPositionInWaitingList(viewer.getUserID(), event.getEventID());
+            if (position > event.getMaxParticipants()) {
+                registerButton.setText("In Waiting List (Position " + (position-event.getMaxParticipants()) + ")\n\tClick to Unregister");
+                registerButton.setDisable(false);
+            }
+            else {
+                registerButton.setText("Unregister");
+                registerButton.setDisable(false);
+            }
+
+            registerButton.setOnAction(e -> {
+                SystemManager.removeUserRegistrationFromEvent(viewer.getUserID(), event.getEventID());
+                app.showViewerPage(viewer);
+            });
         } else if (isFull) {
             registerButton.setText("Event Full");
             registerButton.setDisable(true);
@@ -292,26 +344,35 @@ public class ViewerPage {
             waitingListButton.setText("Join Waiting List (" + queueLength + " in queue)");
             waitingListButton.setOnAction(e -> {
                 SystemManager.registerUserToEvent(viewer.getUserID(), event.getEventID());
-                waitingListButton.setText("Added to Waiting List");
-                waitingListButton.setDisable(true);
+                app.showViewerPage(viewer);
             });
         } else {
             registerButton.setOnAction(e -> {
                 SystemManager.registerUserToEvent(viewer.getUserID(), event.getEventID());
-                registerButton.setText("Already Registered");
-                registerButton.setDisable(true);
+                registerButton.setText("Unregister");
+                registerButton.setDisable(false);
+
+                registerButton.setOnAction(unregisterEvent -> {
+                    SystemManager.removeUserRegistrationFromEvent(viewer.getUserID(), event.getEventID());
+                    registerButton.setText("Register");
+                    registerButton.setDisable(false);
+                    app.showViewerPage(viewer);
+                });
+                app.showViewerPage(viewer);
             });
         }
 
         HBox buttonContainer = new HBox(10);
         buttonContainer.getChildren().addAll(favoriteButton, registerButton);
-        
+
         if (isFull && !isRegistered) {
             buttonContainer.getChildren().add(waitingListButton);
         }
 
-        eventCard.getChildren().addAll(titleBox, eventDesc, eventDate, eventVenue, eventDept, eventOrganizer, isOnlineLabel, maxParticipants, field1Label, field2Label, buttonContainer);
-        eventCard.setStyle("-fx-border-color: gray; -fx-border-radius: 10px; -fx-background-radius: 10px;");
+        eventCard.getChildren().addAll(
+            titleBox, eventDesc, eventDate, eventVenue, eventDept, eventOrganizer, 
+            isOnlineLabel, maxParticipants, field1Label, field2Label, buttonContainer
+        );
 
         return eventCard;
     }

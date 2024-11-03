@@ -100,7 +100,7 @@ public class OrganizerPage {
 
     private void showAllEvents() {
         eventsContainer.getChildren().clear();
-        ArrayList<Event> events = SystemManager.getAllEvents();  // Simulated events
+        ArrayList<Event> events = SystemManager.getAllEvents();
         events.forEach(event -> {
             VBox eventCard = createEventCard(event, false, false);
             eventsContainer.getChildren().add(eventCard);

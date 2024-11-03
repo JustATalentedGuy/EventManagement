@@ -1,5 +1,6 @@
 package UI;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
@@ -278,6 +279,12 @@ public class EditEventPage {
                 ((Workshop)event).setMaterialsProvided(materialsProvidedField.getText());
                 break;
         }        
+        LocalDate startDate = startDatePicker.getValue();
+        LocalDate endDate = endDatePicker.getValue();
+        String startTime = startTimeBox.getValue();
+        String endTime = endTimeBox.getValue();
+        String startDateTime = startDate.toString() + " " + startTime;
+        String endDateTime = endDate.toString() + " " + endTime;
 
         event.setName(eventNameField.getText());
         event.setDescription(eventDescField.getText());
@@ -286,6 +293,9 @@ public class EditEventPage {
         event.setMaxParticipants(Integer.parseInt(maxParticipantsField.getText()));
         event.setOnline(onlineRadioButton.isSelected());
         event.setEventType(eventType);
+        event.setStartTime(startDateTime);
+        event.setEndTime(endDateTime);
+
 
         showAlert("Changes Saved", "Event details have been updated successfully.");
         app.showOrganizerPage(organizer);
