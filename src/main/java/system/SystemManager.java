@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import venue.Department;
 import venue.Venue;
@@ -412,7 +413,7 @@ public abstract class SystemManager {
     }
 
     public static ArrayList<Event> getEventsByOrganizer(int id) {
-    String query = "SELECT * FROM event WHERE organizer = ?";
+    String query = "SELECT * FROM event WHERE organizer = ? and approved = true and rejected = false and starttime > CURRENT_TIMESTAMP";
         ArrayList<Event> events = new ArrayList<>();
         try (PreparedStatement stmt = con.prepareStatement(query)) {
             stmt.setInt(1, id);
@@ -424,6 +425,7 @@ public abstract class SystemManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        Collections.sort(events);
         return events;
     }
 
@@ -440,11 +442,12 @@ public abstract class SystemManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        Collections.sort(events);
         return events;
     }
 
     public static ArrayList<Event> getAllEvents() {
-        String query = "SELECT * FROM event where approved = true and finished = false";
+        String query = "SELECT * FROM event where approved = true AND starttime >= CURRENT_DATE";
         ArrayList<Event> events = new ArrayList<>();
         try (PreparedStatement stmt = con.prepareStatement(query)) {
             try (ResultSet result = stmt.executeQuery()) {
@@ -455,6 +458,7 @@ public abstract class SystemManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        Collections.sort(events);
         return events;
     }
 
@@ -471,6 +475,45 @@ public abstract class SystemManager {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public static ArrayList<User> getWaitingList(int event_id, int max_participants) {
+        String query = "SELECT * FROM registration WHERE event_id = ? ORDER BY registration_date ASC";
+        ArrayList<User> users = new ArrayList<>();
+    
+        try (PreparedStatement stmt = con.prepareStatement(query)) {
+            stmt.setInt(1, event_id);
+            try (ResultSet result = stmt.executeQuery()) {
+                while (result.next()) {
+                    users.add(getUser(result.getInt("user_id")));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    
+        if (users.size() <= max_participants) {
+            return new ArrayList<>();
+        }
+        return new ArrayList<>(users.subList(max_participants, users.size()));
+    }
+    
+    public static boolean isUserRegistered(int user_id, int event_id, int max_participants) {
+        ArrayList<User> allRegistrations = getListOfUsersFromEvent(event_id);
+        if (allRegistrations.size() <= max_participants) {
+            return allRegistrations.stream().anyMatch(user -> user.getUserID() == user_id);
+        }
+        return allRegistrations.subList(0, max_participants).stream().anyMatch(user -> user.getUserID() == user_id);
+    }
+    
+    // Check if the user is in the waiting list
+    public static boolean isUserInWaitingList(int user_id, int event_id, int max_participants) {
+        ArrayList<User> allRegistrations = getListOfUsersFromEvent(event_id);
+        if (allRegistrations.size() <= max_participants) {
+            return false; // No waiting list if registrations are <= max participants
+        }
+        return allRegistrations.subList(max_participants, allRegistrations.size()).stream()
+                .anyMatch(user -> user.getUserID() == user_id);
     }
 
     public static ArrayList<User> getListOfUsersFromEvent(int id) {
@@ -541,7 +584,7 @@ public abstract class SystemManager {
 
     public static ArrayList<Event> getListOfOrganizingRequests() {
         ArrayList<Event> events = new ArrayList<>();
-        String query = "SELECT * FROM event WHERE approved = false";
+        String query = "SELECT * FROM event WHERE approved = false and rejected = false and starttime >= CURRENT_DATE";
         try (PreparedStatement stmt = con.prepareStatement(query)) {
             try (ResultSet result = stmt.executeQuery()) {
                 while (result.next()) {
@@ -556,6 +599,7 @@ public abstract class SystemManager {
         catch (Exception e) {
             e.printStackTrace();
         }
+        Collections.sort(events);
         return events;
     }
 

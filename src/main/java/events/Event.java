@@ -9,7 +9,7 @@ import users.User;
 import venue.Department;
 import venue.Venue;
 
-public abstract class Event {
+public abstract class Event implements Comparable<Event> { 
     protected int eventID;
     protected String name;
     protected String description;
@@ -236,5 +236,10 @@ public abstract class Event {
 
     public String getEventType() {
         return eventType;
+    }
+
+    @Override
+    public int compareTo(Event other) {
+        return this.getStartTimeDate().compareTo(other.getStartTimeDate());
     }
 }

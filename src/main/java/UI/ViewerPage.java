@@ -12,16 +12,27 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.GridPane;
+import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 import javafx.scene.control.Alert.AlertType;
 
@@ -78,7 +89,12 @@ public class ViewerPage {
         Tab favoriteEventsTab = new Tab("Favourite Events");
         favoriteEventsTab.setContent(createFavoriteEventsView());
 
-        tabPane.getTabs().addAll(availableEventsTab, registeredEventsTab, favoriteEventsTab);
+        // Calendar View Tab
+        Tab calendarTab = new Tab("Calendar View");
+        CalendarView calendarView = new CalendarView(SystemManager.getAllEvents());
+        calendarTab.setContent(calendarView);
+
+        tabPane.getTabs().addAll(availableEventsTab, registeredEventsTab, favoriteEventsTab, calendarTab);
 
         Button goBack = new Button("Log Out");
         goBack.setOnAction(e -> app.showLoginPage());
@@ -95,7 +111,7 @@ public class ViewerPage {
         eventTypeFilter = new ComboBox<>();
         eventTypeFilter.getItems().addAll("All", "Competition", "Workshop", "Seminar");
         eventTypeFilter.setValue("All");
-        
+
         eventTypeFilter.setOnAction(e -> applyFilters());
 
         // Date Filters
@@ -108,7 +124,7 @@ public class ViewerPage {
         beforeDateFilter.setOnAction(e -> applyFilters());
 
         filterPane.getChildren().addAll(new Label("Event Type:"), eventTypeFilter, new Label("After:"), afterDateFilter, new Label("Before:"), beforeDateFilter);
-        
+
         return filterPane;
     }
 
@@ -200,7 +216,7 @@ public class ViewerPage {
         eventCard.setSpacing(10);
 
         Label field1Label = null, field2Label = null;
-        
+
         if (event instanceof Workshop) {
             eventCard.setStyle(eventCard.getStyle() + "-fx-background-color: #ffe6b3;");
             Workshop workshopEvent = (Workshop) event;
@@ -216,12 +232,12 @@ public class ViewerPage {
             Competition competitionEvent = (Competition) event;
             field1Label = new Label("Prize Amount: " + competitionEvent.getPrizeAmount());
             field2Label = new Label("Type of Competition: " + competitionEvent.getCompetitionType());
-        }        
+        }
 
         HBox titleBox = new HBox();
         Label eventTitle = new Label(event.getName());
         eventTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-    
+
         // Add registered count at the right end of event title
         Label registeredCount = new Label("Registered x" + SystemManager.getListOfUsersFromEvent(event.getEventID()).size());
         registeredCount.setStyle("-fx-alignment: center-right; -fx-font-size: 14px;");
@@ -246,59 +262,197 @@ public class ViewerPage {
 
         // Create favorite/unfavorite button
         Button favoriteButton = new Button(isFavourite ? "Remove from Favorites" : "Add to Favorites");
-        favoriteButton.setStyle(isFavourite ? "-fx-text-fill: red;" : "-fx-text-fill: black;");
-
         favoriteButton.setOnAction(e -> {
             if (isFavourite) {
                 SystemManager.removeFromFavourites(viewer.getUserID(), event.getEventID());
                 favoriteButton.setText("Add to Favorites");
-                favoriteButton.setStyle("-fx-text-fill: black;");
             } else {
                 SystemManager.addToFavourites(viewer.getUserID(), event.getEventID());
                 favoriteButton.setText("Remove from Favorites");
-                favoriteButton.setStyle("-fx-text-fill: red;");
             }
-            app.showViewerPage(viewer);
         });
 
-        // Register/Unregister button based on registration status
-        if (SystemManager.userIsRegisteredToEvent(viewer.getUserID(), event.getEventID())) {
-            Button unregisterButton = new Button("Unregister");
-            unregisterButton.setOnAction(e -> {
-                SystemManager.removeUserRegistrationFromEvent(viewer.getUserID(), event.getEventID());
-                app.showViewerPage(viewer);
+        // Register button
+        Button registerButton = new Button("Register");
+        Button waitingListButton = new Button("Join Waiting List");
+        
+        // Check if event is full and viewer is not already registered
+        boolean isFull = SystemManager.getListOfUsersFromEvent(event.getEventID()).size() >= event.getMaxParticipants();
+        boolean isRegistered = SystemManager.userIsRegisteredToEvent(viewer.getUserID(), event.getEventID());
+
+        if (isRegistered) {
+            registerButton.setText("Already Registered");
+            registerButton.setDisable(true);
+        } else if (isFull) {
+            registerButton.setText("Event Full");
+            registerButton.setDisable(true);
+
+            // Show waiting list button if event is full and user is not registered
+            int queueLength = SystemManager.getWaitingList(event.getEventID(), event.getMaxParticipants()).size();
+            waitingListButton.setText("Join Waiting List (" + queueLength + " in queue)");
+            waitingListButton.setOnAction(e -> {
+                SystemManager.registerUserToEvent(viewer.getUserID(), event.getEventID());
+                waitingListButton.setText("Added to Waiting List");
+                waitingListButton.setDisable(true);
             });
-            unregisterButton.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: green;");
-            eventCard.getChildren().addAll(titleBox, eventDesc, eventDate, eventVenue, eventDept, eventOrganizer, maxParticipants, isOnlineLabel, field1Label, field2Label, unregisterButton, favoriteButton);
         } else {
-            Button registerButton = new Button("Register");
             registerButton.setOnAction(e -> {
-                registerForEvent(event);
-                app.showViewerPage(viewer);
+                SystemManager.registerUserToEvent(viewer.getUserID(), event.getEventID());
+                registerButton.setText("Already Registered");
+                registerButton.setDisable(true);
             });
-            eventCard.getChildren().addAll(titleBox, eventDesc, eventDate, eventVenue, eventDept, eventOrganizer, maxParticipants, isOnlineLabel, field1Label, field2Label, registerButton, favoriteButton);
         }
+
+        HBox buttonContainer = new HBox(10);
+        buttonContainer.getChildren().addAll(favoriteButton, registerButton);
+        
+        if (isFull && !isRegistered) {
+            buttonContainer.getChildren().add(waitingListButton);
+        }
+
+        eventCard.getChildren().addAll(titleBox, eventDesc, eventDate, eventVenue, eventDept, eventOrganizer, isOnlineLabel, maxParticipants, field1Label, field2Label, buttonContainer);
+        eventCard.setStyle("-fx-border-color: gray; -fx-border-radius: 10px; -fx-background-radius: 10px;");
 
         return eventCard;
     }
 
-    private void registerForEvent(Event event) {
-        if (SystemManager.registerUserToEvent(viewer.getUserID(), event.getEventID())) {
-            Alert alert = new Alert(AlertType.INFORMATION);
-            alert.setTitle("Registration");
-            alert.setHeaderText("Registration Successful");
-            alert.setContentText("You have successfully registered for " + event.getName());
-            alert.showAndWait();
-        } else {
-            Alert alert = new Alert(AlertType.ERROR);
-            alert.setTitle("Registration");
-            alert.setHeaderText("Registration Failed");
-            alert.setContentText("You have already registered for this event");
-            alert.showAndWait();
-        }
-    }
-
     public VBox getRootPane() {
         return rootPane;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+class CalendarView extends VBox {
+
+    private YearMonth currentMonth;
+    private List<Event> events;
+
+    public CalendarView(List<Event> events) {
+        this.events = events;
+        this.currentMonth = YearMonth.now();
+        updateCalendar();
+    }
+
+    private void updateCalendar() {
+        this.getChildren().clear();
+
+        // Header for the month
+        Label monthLabel = new Label(currentMonth.getMonth() + " " + currentMonth.getYear());
+        monthLabel.setFont(Font.font("Arial", FontWeight.BOLD, 18));
+        monthLabel.setAlignment(Pos.CENTER);
+
+        // Grid for days of the month
+        GridPane calendarGrid = new GridPane();
+        calendarGrid.setHgap(10);
+        calendarGrid.setVgap(10);
+        calendarGrid.setPadding(new Insets(10));
+
+        // Days of the week header
+        String[] daysOfWeek = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+        for (int i = 0; i < daysOfWeek.length; i++) {
+            Label dayLabel = new Label(daysOfWeek[i]);
+            dayLabel.setFont(Font.font("Arial", FontWeight.BOLD, 12));
+            calendarGrid.add(dayLabel, i, 0);
+        }
+
+        // Get events for the current month
+        Map<LocalDate, List<Event>> eventsByDate = events.stream()
+                .filter(event -> event.getStartTimeDate().getYear() == currentMonth.getYear() &&
+                        event.getStartTimeDate().getMonth() == currentMonth.getMonth())
+                .collect(Collectors.groupingBy(event -> event.getStartTimeDate().toLocalDate()));
+
+        LocalDate firstDayOfMonth = currentMonth.atDay(1);
+        int firstDayOfWeek = firstDayOfMonth.getDayOfWeek().getValue() % 7;
+
+        // Fill in days of the month
+        int dayCounter = 1;
+        for (int row = 1; row < 7; row++) {
+            for (int col = 0; col < 7; col++) {
+                if (row == 1 && col < firstDayOfWeek) continue;
+                if (dayCounter > currentMonth.lengthOfMonth()) break;
+
+                LocalDate date = firstDayOfMonth.withDayOfMonth(dayCounter);
+                VBox dayBox = new VBox();
+                dayBox.setAlignment(Pos.TOP_LEFT);
+                dayBox.setPadding(new Insets(5));
+                dayBox.setStyle("-fx-border-color: lightgray;");
+                
+                Label dayLabel = new Label(String.valueOf(dayCounter));
+                dayBox.getChildren().add(dayLabel);
+
+                // Highlight event dates
+                if (eventsByDate.containsKey(date)) {
+                    dayBox.setStyle("-fx-background-color: lightblue;");
+                    List<Event> dayEvents = eventsByDate.get(date);
+                    
+                    // Add Tooltip to show event details on hover
+                    Tooltip tooltip = new Tooltip(getEventDetails(dayEvents));
+                    Tooltip.install(dayBox, tooltip);
+
+                    // Add event list popover on click
+                    dayBox.setOnMouseClicked(event -> showEventPopover(dayEvents, dayBox));
+                }
+
+                calendarGrid.add(dayBox, col, row);
+                dayCounter++;
+            }
+        }
+
+        // Navigation buttons for month
+        Label prevButton = new Label("<");
+        prevButton.setOnMouseClicked(e -> navigateMonth(-1));
+        Label nextButton = new Label(">");
+        nextButton.setOnMouseClicked(e -> navigateMonth(1));
+
+        // Arrange header and grid
+        VBox headerBox = new VBox(new Label("Calendar View"), prevButton, monthLabel, nextButton);
+        headerBox.setAlignment(Pos.CENTER);
+        headerBox.setSpacing(10);
+
+        this.getChildren().addAll(headerBox, calendarGrid);
+    }
+
+    // Method to navigate between months
+    private void navigateMonth(int direction) {
+        currentMonth = currentMonth.plusMonths(direction);
+        updateCalendar();
+    }
+
+    // Method to format event details as a string for the tooltip
+    private String getEventDetails(List<Event> events) {
+        StringBuilder details = new StringBuilder();
+        for (Event event : events) {
+            details.append(event.getName()).append(" - ").append(event.getStartTime()).append("\n");
+        }
+        return details.toString();
+    }
+
+    // Method to show a popover with event details when clicked
+    private void showEventPopover(List<Event> events, VBox dayBox) {
+        Stage popover = new Stage();
+        popover.initModality(Modality.APPLICATION_MODAL);
+        VBox popoverContent = new VBox();
+        popoverContent.setPadding(new Insets(10));
+        popoverContent.setStyle("-fx-background-color: white; -fx-border-color: lightgray;");
+        
+        Label title = new Label("Events on " + events.get(0).getStartTimeDate().toLocalDate());
+        title.setFont(Font.font("Arial", FontWeight.BOLD, 14));
+        
+        for (Event event : events) {
+            Label eventLabel = new Label(event.getName() + " at " + event.getStartTime());
+            eventLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 12));
+            popoverContent.getChildren().add(eventLabel);
+        }
+
+        popover.setScene(new Scene(popoverContent));
+        popover.show();
     }
 }
