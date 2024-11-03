@@ -7,6 +7,10 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import system.SystemManager;
 
+import javafx.geometry.Pos;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.Priority;
+
 public class RegisterPage {
 
     private Main app;
@@ -22,7 +26,19 @@ public class RegisterPage {
         rootPane.setPadding(new Insets(20));
         rootPane.setHgap(20);
         rootPane.setVgap(20);
+        rootPane.setAlignment(Pos.CENTER);  // Center alignment
         rootPane.setBackground(new Background(new BackgroundFill(Color.web("#3498db"), CornerRadii.EMPTY, Insets.EMPTY)));
+
+        // Add column constraints to center content
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setHgrow(Priority.ALWAYS);
+        col1.setPercentWidth(50);
+
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setHgrow(Priority.ALWAYS);
+        col2.setPercentWidth(50);
+
+        rootPane.getColumnConstraints().addAll(col1, col2);
 
         Label titleLabel = new Label("Register - Event Management System");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;");
@@ -95,4 +111,3 @@ public class RegisterPage {
         return rootPane;
     }
 }
-

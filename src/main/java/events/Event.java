@@ -24,6 +24,8 @@ public abstract class Event implements Comparable<Event> {
     protected boolean approved;
     protected boolean rejected;
     protected String eventType;
+
+    
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 

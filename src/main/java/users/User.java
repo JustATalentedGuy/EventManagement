@@ -5,7 +5,7 @@ import java.util.List;
 import events.Event;
 import system.SystemManager;
 
-public abstract class User {
+public abstract class User          {
     protected int userID;
     protected String username;
     protected String password;

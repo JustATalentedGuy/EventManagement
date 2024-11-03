@@ -32,10 +32,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
 import java.io.InputStream;
-
-import javafx.scene.control.Alert.AlertType;
 
 public class ViewerPage {
 
@@ -504,11 +501,12 @@ class CalendarView extends VBox {
         popoverContent.setPadding(new Insets(10));
         popoverContent.setStyle("-fx-background-color: white; -fx-border-color: lightgray;");
         
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd, yyyy, hh:mm a");
         Label title = new Label("Events on " + events.get(0).getStartTimeDate().toLocalDate());
         title.setFont(Font.font("Arial", FontWeight.BOLD, 14));
         
         for (Event event : events) {
-            Label eventLabel = new Label(event.getName() + " at " + event.getStartTime());
+            Label eventLabel = new Label(event.getName() + " at " + event.getStartTimeDate().format(formatter));
             eventLabel.setFont(Font.font("Arial", FontWeight.NORMAL, 12));
             popoverContent.getChildren().add(eventLabel);
         }

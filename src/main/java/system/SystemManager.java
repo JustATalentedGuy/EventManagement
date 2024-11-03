@@ -125,7 +125,6 @@ public abstract class SystemManager {
     public static int validateUser(String username, String password, String userType) {
         String query = "SELECT * FROM users WHERE username = ? AND password = ? AND userType = ?";
         try (PreparedStatement stmt = con.prepareStatement(query)) {
-            
             stmt.setString(1, username);
             stmt.setString(2, password);
             stmt.setString(3, userType);
@@ -523,11 +522,10 @@ public abstract class SystemManager {
         return allRegistrations.subList(0, max_participants).stream().anyMatch(user -> user.getUserID() == user_id);
     }
     
-    // Check if the user is in the waiting list
     public static boolean isUserInWaitingList(int user_id, int event_id, int max_participants) {
         ArrayList<User> allRegistrations = getListOfUsersFromEvent(event_id);
         if (allRegistrations.size() <= max_participants) {
-            return false; // No waiting list if registrations are <= max participants
+            return false;
         }
         return allRegistrations.subList(max_participants, allRegistrations.size()).stream()
                 .anyMatch(user -> user.getUserID() == user_id);

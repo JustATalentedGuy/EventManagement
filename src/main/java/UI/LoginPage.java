@@ -2,19 +2,9 @@ package UI;
 
 import eventmanagement.Main;
 import javafx.geometry.Insets;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.GridPane;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import system.SystemManager;
 import users.Admin;
@@ -25,7 +15,7 @@ import users.Viewer;
 public class LoginPage {
 
     private Main app;
-    private GridPane rootPane;
+    private StackPane rootPane;
 
     public LoginPage(Main app) {
         this.app = app;
@@ -33,15 +23,20 @@ public class LoginPage {
     }
 
     private void createLoginPage() {
-        rootPane = new GridPane();
-        rootPane.setPadding(new Insets(20));
-        rootPane.setHgap(20);
-        rootPane.setVgap(20);
+        // Use StackPane as the root container to center the content
+        rootPane = new StackPane();
         rootPane.setBackground(new Background(new BackgroundFill(Color.web("#3498db"), CornerRadii.EMPTY, Insets.EMPTY)));
+
+        // Center container with the login form
+        GridPane loginPane = new GridPane();
+        loginPane.setPadding(new Insets(20));
+        loginPane.setHgap(20);
+        loginPane.setVgap(20);
+        loginPane.setAlignment(Pos.CENTER);  // Center align components within GridPane
 
         Label titleLabel = new Label("Event Management System");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;");
-        rootPane.add(titleLabel, 0, 0, 2, 1);
+        loginPane.add(titleLabel, 0, 0, 2, 1);
 
         MenuBar menuBar = new MenuBar();
         Menu menu = new Menu("Options");
@@ -51,7 +46,7 @@ public class LoginPage {
         menuBar.getMenus().add(menu);
         exitItem.setOnAction(e -> System.exit(0));
         aboutItem.setOnAction(e -> showAlert("About", "This is an event management system for college events."));
-        rootPane.add(menuBar, 0, 1, 2, 1);
+        loginPane.add(menuBar, 0, 1, 2, 1);
 
         Label userLabel = new Label("Username:");
         userLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: white;");
@@ -63,10 +58,10 @@ public class LoginPage {
         PasswordField passField = new PasswordField();
         passField.setStyle("-fx-background-color: #f7f7f7; -fx-text-fill: black; -fx-font-size: 12px;");
 
-        rootPane.add(userLabel, 0, 2);
-        rootPane.add(userField, 1, 2);
-        rootPane.add(passLabel, 0, 3);
-        rootPane.add(passField, 1, 3);
+        loginPane.add(userLabel, 0, 2);
+        loginPane.add(userField, 1, 2);
+        loginPane.add(passLabel, 0, 3);
+        loginPane.add(passField, 1, 3);
 
         Label userTypeLabel = new Label("User Type:");
         userTypeLabel.setStyle("-fx-font-size: 18px; -fx-text-fill: white;");
@@ -74,8 +69,8 @@ public class LoginPage {
         userTypeBox.getItems().addAll("Viewer", "Organizer", "Admin");
         userTypeBox.setStyle("-fx-background-color: #f7f7f7; -fx-text-fill: black; -fx-font-size: 12px;");
 
-        rootPane.add(userTypeLabel, 0, 4);
-        rootPane.add(userTypeBox, 1, 4);
+        loginPane.add(userTypeLabel, 0, 4);
+        loginPane.add(userTypeBox, 1, 4);
 
         Button loginButton = new Button("Login");
         loginButton.setStyle("-fx-background-color: #2ecc71; -fx-text-fill: white; -fx-font-size: 16px;");
@@ -99,8 +94,11 @@ public class LoginPage {
         switchToRegisterButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14px;");
         switchToRegisterButton.setOnAction(e -> app.showRegisterPage());
 
-        rootPane.add(loginButton, 1, 5);
-        rootPane.add(switchToRegisterButton, 1, 6);
+        loginPane.add(loginButton, 1, 5);
+        loginPane.add(switchToRegisterButton, 1, 6);
+
+        // Add loginPane to the center of the rootPane
+        rootPane.getChildren().add(loginPane);
     }
 
     private void showAlert(String title, String message) {
@@ -111,7 +109,7 @@ public class LoginPage {
         alert.showAndWait();
     }
 
-    public GridPane getRootPane() {
+    public StackPane getRootPane() {
         return rootPane;
     }
 }

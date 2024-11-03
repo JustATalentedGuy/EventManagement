@@ -12,6 +12,10 @@ public class Viewer extends User {
     }
 
     public ArrayList<Event> getListOfRegisteredEvents() {
-        return SystemManager.getListOfEventsFromUser(userID);
+        return SystemManager.getListOfRegisteredEvents(userID);
+    }
+
+    public ArrayList<Event> getListOfFavouriteEvents() {
+        return SystemManager.getListOfFavouriteEvents(userID);
     }
 }
