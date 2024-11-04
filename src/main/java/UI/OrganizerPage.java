@@ -56,7 +56,6 @@ public class OrganizerPage {
         titleLabel.setStyle("-fx-text-fill: #FFFFFF;");
         titleLabel.setBackground(new Background(new BackgroundFill(Color.web("#0000FF"), CornerRadii.EMPTY, Insets.EMPTY)));
 
-        // Toggle buttons for event categories
         toggleGroup = new ToggleGroup();
 
         ToggleButton allEventsToggle = new ToggleButton("All Events");
@@ -70,12 +69,10 @@ public class OrganizerPage {
         HBox toggleButtons = new HBox(10, allEventsToggle, myEventsToggle, pendingRequestsToggle);
         toggleButtons.setPadding(new Insets(10, 0, 10, 0));
 
-        // Set actions for toggle buttons
         allEventsToggle.setOnAction(e -> showAllEvents());
         myEventsToggle.setOnAction(e -> showMyEvents());
         pendingRequestsToggle.setOnAction(e -> showPendingRequests());
 
-        // Container for events
         eventsContainer = new VBox();
         myEventsContainer = new VBox();
         pendingRequestsContainer = new VBox();
@@ -94,7 +91,6 @@ public class OrganizerPage {
 
         rootPane.getChildren().addAll(titleLabel, toggleButtons, scrollPane, registerButton, goBack);
         
-        // Default view for All Events
         showAllEvents();
     }
 

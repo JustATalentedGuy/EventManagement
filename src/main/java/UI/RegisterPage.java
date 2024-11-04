@@ -26,10 +26,9 @@ public class RegisterPage {
         rootPane.setPadding(new Insets(20));
         rootPane.setHgap(20);
         rootPane.setVgap(20);
-        rootPane.setAlignment(Pos.CENTER);  // Center alignment
+        rootPane.setAlignment(Pos.CENTER);
         rootPane.setBackground(new Background(new BackgroundFill(Color.web("#3498db"), CornerRadii.EMPTY, Insets.EMPTY)));
 
-        // Add column constraints to center content
         ColumnConstraints col1 = new ColumnConstraints();
         col1.setHgrow(Priority.ALWAYS);
         col1.setPercentWidth(50);

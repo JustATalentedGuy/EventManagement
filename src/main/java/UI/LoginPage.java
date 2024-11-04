@@ -23,16 +23,14 @@ public class LoginPage {
     }
 
     private void createLoginPage() {
-        // Use StackPane as the root container to center the content
         rootPane = new StackPane();
         rootPane.setBackground(new Background(new BackgroundFill(Color.web("#3498db"), CornerRadii.EMPTY, Insets.EMPTY)));
 
-        // Center container with the login form
         GridPane loginPane = new GridPane();
         loginPane.setPadding(new Insets(20));
         loginPane.setHgap(20);
         loginPane.setVgap(20);
-        loginPane.setAlignment(Pos.CENTER);  // Center align components within GridPane
+        loginPane.setAlignment(Pos.CENTER); 
 
         Label titleLabel = new Label("Event Management System");
         titleLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;");
@@ -97,7 +95,6 @@ public class LoginPage {
         loginPane.add(loginButton, 1, 5);
         loginPane.add(switchToRegisterButton, 1, 6);
 
-        // Add loginPane to the center of the rootPane
         rootPane.getChildren().add(loginPane);
     }
 

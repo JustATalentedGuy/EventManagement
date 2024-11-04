@@ -31,15 +31,13 @@ public class NewEventRequestPage {
     private Organizer organizer;
     private VBox rootPane;
 
-    // Fields for event-specific input
-    private TextField prizeAmountField;         // For Competition
-    private TextField competitionTypeField;     // For Competition
-    private TextField speakerNameField;         // For Seminar
-    private TextField topicNameField;           // For Seminar
-    private TextField trainerNameField;         // For Workshop
-    private TextArea materialsProvidedField;    // For Workshop
+    private TextField prizeAmountField;
+    private TextField competitionTypeField;
+    private TextField speakerNameField;
+    private TextField topicNameField;
+    private TextField trainerNameField;
+    private TextArea materialsProvidedField;
 
-    // Containers for event-specific fields
     private VBox eventSpecificFields;
 
     public NewEventRequestPage(Main app, Organizer organizer) {
@@ -52,12 +50,11 @@ public class NewEventRequestPage {
         rootPane = new VBox();
         rootPane.setPadding(new Insets(20));
         rootPane.setSpacing(15);
-        rootPane.setStyle("-fx-background-color: #FFEBCD;"); // Light gray background
+        rootPane.setStyle("-fx-background-color: #FFEBCD;");
 
-        // Add all components to the rootPane (not the ScrollPane)
         Label titleLabel = new Label("Request to Organize New Event");
         titleLabel.setFont(Font.font(24));
-        titleLabel.setTextFill(Color.web("#3498db")); // Blue text
+        titleLabel.setTextFill(Color.web("#3498db"));
 
         TextField eventNameField = new TextField();
         eventNameField.setPromptText("Event Name");
@@ -81,13 +78,11 @@ public class NewEventRequestPage {
         maxParticipantsField.setPromptText("Maximum Participants");
         maxParticipantsField.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-border-radius: 5;");
 
-        // DatePicker for Start and End Dates
         DatePicker startDatePicker = new DatePicker();
         startDatePicker.setPromptText("Select Start Date");
         DatePicker endDatePicker = new DatePicker();
         endDatePicker.setPromptText("Select End Date");
 
-        // ComboBox for Start and End Times
         ComboBox<String> startTimeBox = new ComboBox<>();
         ComboBox<String> endTimeBox = new ComboBox<>();
         startTimeBox.getItems().addAll(getTimeOptions());
@@ -95,32 +90,28 @@ public class NewEventRequestPage {
         startTimeBox.setPromptText("Select Start Time");
         endTimeBox.setPromptText("Select End Time");
 
-        // ToggleGroup for Online or Offline selection
         ToggleGroup onlineOfflineToggleGroup = new ToggleGroup();
         RadioButton onlineRadioButton = new RadioButton("Online");
         onlineRadioButton.setToggleGroup(onlineOfflineToggleGroup);
-        onlineRadioButton.setSelected(true);  // Default to Online
+        onlineRadioButton.setSelected(true);
         RadioButton offlineRadioButton = new RadioButton("Offline");
         offlineRadioButton.setToggleGroup(onlineOfflineToggleGroup);
 
         Label onlineOfflineLabel = new Label("Event Type:");
         onlineOfflineLabel.setStyle("-fx-font-weight: bold;");
 
-        // ComboBox for event type selection
         ComboBox<String> eventTypeBox = new ComboBox<>();
         eventTypeBox.getItems().addAll("Competition", "Seminar", "Workshop");
         eventTypeBox.setPromptText("Select Event Type");
         eventTypeBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-border-radius: 5;");
 
-        // Initialize the VBox for event-specific fields
         eventSpecificFields = new VBox();
         eventSpecificFields.setSpacing(5);
-        eventSpecificFields.setVisible(false); // Hide initially
+        eventSpecificFields.setVisible(false);
 
-        // Listen for event type changes and show corresponding fields
         eventTypeBox.setOnAction(e -> {
             String selectedEventType = eventTypeBox.getValue();
-            eventSpecificFields.getChildren().clear(); // Clear previous fields
+            eventSpecificFields.getChildren().clear();
             switch (selectedEventType) {
                 case "Competition":
                     eventSpecificFields.getChildren().addAll(createCompetitionFields());
@@ -132,7 +123,7 @@ public class NewEventRequestPage {
                     eventSpecificFields.getChildren().addAll(createWorkshopFields());
                     break;
             }
-            eventSpecificFields.setVisible(true); // Show the fields after selection
+            eventSpecificFields.setVisible(true);
         });
 
         Button submitButton = new Button("Submit Request");
@@ -160,7 +151,6 @@ public class NewEventRequestPage {
                     field2 = materialsProvidedField.getText();
                 }
 
-                // Process the event request
                 submitEventRequest(eventNameField.getText(), eventDescField.getText(), eventVenueBox.getValue(),
                         eventDepartmentBox.getValue(), organizer.getUserID(), startDateTime, endDateTime, Integer.parseInt(maxParticipantsField.getText()), online, field1, field2, eventTypeBox.getValue());
             } else {
@@ -172,27 +162,22 @@ public class NewEventRequestPage {
         goBack.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 16px; -fx-cursor: hand;");
         goBack.setOnAction(e -> app.showOrganizerPage(organizer));
 
-        // Create a scrollable container for the content
         VBox scrollableContent = new VBox();
         scrollableContent.setSpacing(10);
 
-        // Add all components to the scrollable content container
         scrollableContent.getChildren().addAll(titleLabel, eventNameField, eventDescField, eventVenueBox, eventDepartmentBox, maxParticipantsField,
                 startDatePicker, startTimeBox, endDatePicker, endTimeBox, onlineOfflineLabel, onlineRadioButton, offlineRadioButton,
                 eventTypeBox, eventSpecificFields, submitButton, goBack);
 
-        // Create the ScrollPane and set the content to the scrollable content
         ScrollPane scrollPane = new ScrollPane();
         scrollPane.setContent(scrollableContent);
         scrollPane.setFitToHeight(true);
         scrollPane.setFitToWidth(true);
 
-        // Add the ScrollPane to the rootPane, along with any static elements like labels or borders
         rootPane.getChildren().add(scrollPane);
 
     }
 
-    // Create fields for competition
     private VBox createCompetitionFields() {
         VBox competitionBox = new VBox();
         competitionBox.setSpacing(5);
@@ -211,7 +196,6 @@ public class NewEventRequestPage {
         return competitionBox;
     }
 
-    // Create fields for seminar
     private VBox createSeminarFields() {
         VBox seminarBox = new VBox();
         seminarBox.setSpacing(5);
@@ -230,7 +214,6 @@ public class NewEventRequestPage {
         return seminarBox;
     }
 
-    // Create fields for workshop
     private VBox createWorkshopFields() {
         VBox workshopBox = new VBox();
         workshopBox.setSpacing(5);
@@ -249,7 +232,6 @@ public class NewEventRequestPage {
         return workshopBox;
     }
 
-    // Function to get time options in "HH:MM" format
     private ObservableList<String> getTimeOptions() {
         ObservableList<String> timeOptions = FXCollections.observableArrayList();
         for (int hour = 0; hour <= 23; hour++) {

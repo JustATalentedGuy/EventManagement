@@ -107,13 +107,11 @@ public class ViewerPage {
         filterPane.setPadding(new Insets(10));
         filterPane.setSpacing(10);
 
-        // Event Type Filter
         eventTypeFilter = new ComboBox<>();
         eventTypeFilter.getItems().addAll("All", "Competition", "Workshop", "Seminar");
         eventTypeFilter.setValue("All");
         eventTypeFilter.setOnAction(e -> applyFilters());
 
-        // Department Filter
         departmentFilter = new ComboBox<>();
         ArrayList<Department> availableDepartments = SystemManager.getAllDepartments();
         departmentFilter.getItems().add("All Departments"); // Add actual departments dynamically if available
@@ -121,7 +119,6 @@ public class ViewerPage {
         departmentFilter.setValue("All Departments");
         departmentFilter.setOnAction(e -> applyFilters());
 
-        // Venue Filter
         venueFilter = new ComboBox<>();
         ArrayList<Venue> availableVenues = SystemManager.getAllVenues();
         venueFilter.getItems().addAll("All Venues"); // Add actual venues dynamically if available
@@ -129,7 +126,6 @@ public class ViewerPage {
         venueFilter.setValue("All Venues");
         venueFilter.setOnAction(e -> applyFilters());
 
-        // Date Filters
         afterDateFilter = new DatePicker();
         afterDateFilter.setPromptText("After Date");
         afterDateFilter.setOnAction(e -> applyFilters());
@@ -196,7 +192,6 @@ public class ViewerPage {
                     .collect(Collectors.toList());
         }
 
-        // Filter by date range
         LocalDate afterDate = afterDateFilter.getValue();
         LocalDate beforeDate = beforeDateFilter.getValue();
         if (afterDate != null) {
@@ -402,18 +397,15 @@ class CalendarView extends VBox {
     private void updateCalendar() {
         this.getChildren().clear();
 
-        // Header for the month
         Label monthLabel = new Label(currentMonth.getMonth() + " " + currentMonth.getYear());
         monthLabel.setFont(Font.font("Arial", FontWeight.BOLD, 18));
         monthLabel.setAlignment(Pos.CENTER);
 
-        // Grid for days of the month
         GridPane calendarGrid = new GridPane();
         calendarGrid.setHgap(10);
         calendarGrid.setVgap(10);
         calendarGrid.setPadding(new Insets(10));
 
-        // Days of the week header
         String[] daysOfWeek = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
         for (int i = 0; i < daysOfWeek.length; i++) {
             Label dayLabel = new Label(daysOfWeek[i]);
@@ -421,7 +413,6 @@ class CalendarView extends VBox {
             calendarGrid.add(dayLabel, i, 0);
         }
 
-        // Get events for the current month
         Map<LocalDate, List<Event>> eventsByDate = events.stream()
                 .filter(event -> event.getStartTimeDate().getYear() == currentMonth.getYear() &&
                         event.getStartTimeDate().getMonth() == currentMonth.getMonth())
@@ -430,7 +421,6 @@ class CalendarView extends VBox {
         LocalDate firstDayOfMonth = currentMonth.atDay(1);
         int firstDayOfWeek = firstDayOfMonth.getDayOfWeek().getValue() % 7;
 
-        // Fill in days of the month
         int dayCounter = 1;
         for (int row = 1; row < 7; row++) {
             for (int col = 0; col < 7; col++) {
@@ -446,16 +436,13 @@ class CalendarView extends VBox {
                 Label dayLabel = new Label(String.valueOf(dayCounter));
                 dayBox.getChildren().add(dayLabel);
 
-                // Highlight event dates
                 if (eventsByDate.containsKey(date)) {
                     dayBox.setStyle("-fx-background-color: lightblue;");
                     List<Event> dayEvents = eventsByDate.get(date);
                     
-                    // Add Tooltip to show event details on hover
                     Tooltip tooltip = new Tooltip(getEventDetails(dayEvents));
                     Tooltip.install(dayBox, tooltip);
 
-                    // Add event list popover on click
                     dayBox.setOnMouseClicked(event -> showEventPopover(dayEvents, dayBox));
                 }
 
@@ -464,13 +451,11 @@ class CalendarView extends VBox {
             }
         }
 
-        // Navigation buttons for month
         Label prevButton = new Label("<");
         prevButton.setOnMouseClicked(e -> navigateMonth(-1));
         Label nextButton = new Label(">");
         nextButton.setOnMouseClicked(e -> navigateMonth(1));
 
-        // Arrange header and grid
         VBox headerBox = new VBox(new Label("Calendar View"), prevButton, monthLabel, nextButton);
         headerBox.setAlignment(Pos.CENTER);
         headerBox.setSpacing(10);
@@ -478,13 +463,11 @@ class CalendarView extends VBox {
         this.getChildren().addAll(headerBox, calendarGrid);
     }
 
-    // Method to navigate between months
     private void navigateMonth(int direction) {
         currentMonth = currentMonth.plusMonths(direction);
         updateCalendar();
     }
 
-    // Method to format event details as a string for the tooltip
     private String getEventDetails(List<Event> events) {
         StringBuilder details = new StringBuilder();
         for (Event event : events) {
@@ -493,7 +476,6 @@ class CalendarView extends VBox {
         return details.toString();
     }
 
-    // Method to show a popover with event details when clicked
     private void showEventPopover(List<Event> events, VBox dayBox) {
         Stage popover = new Stage();
         popover.initModality(Modality.APPLICATION_MODAL);

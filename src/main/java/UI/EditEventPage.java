@@ -30,10 +30,9 @@ public class EditEventPage {
 
     private Main app;
     private Organizer organizer;
-    private Event event;  // Current event being edited
+    private Event event;
     private VBox rootPane;
 
-    // Fields for general event input
     private TextField eventNameField;
     private TextArea eventDescField;
     private ComboBox<String> eventVenueBox;
@@ -46,7 +45,6 @@ public class EditEventPage {
     private RadioButton onlineRadioButton;
     private RadioButton offlineRadioButton;
 
-    // Fields for event-specific input
     private TextField prizeAmountField;
     private TextField competitionTypeField;
     private TextField speakerNameField;
